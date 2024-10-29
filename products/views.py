@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Category
@@ -10,6 +10,10 @@ from .serializers import CategorySerializer
 from .serializers import ProductSerializer
 from .serializers import OrderSerializer
 from .serializers import UserSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from .permissions import IsOwnerOrReadOnly
+from rest_framework.permissions import IsAuthenticated
+
 
 class CategoryAPIView(APIView):
     def get(self, request):
@@ -82,6 +86,20 @@ class CategoryDetailView(APIView):
 
 
 
+class ProductAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get(self, request):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class ProductAPIView(APIView):
     def get(self, request):
         products = Product.objects.all()
