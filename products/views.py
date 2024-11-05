@@ -13,6 +13,7 @@ from .serializers import UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 
 class CategoryAPIView(APIView):
@@ -87,7 +88,7 @@ class CategoryDetailView(APIView):
 
 
 class ProductAPIView(APIView):
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         products = Product.objects.all()
